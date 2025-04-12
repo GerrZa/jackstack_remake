@@ -1,15 +1,20 @@
 #region fixed variable
 
-	CARD_INIT_POS_X = 240
-	CARD_INIT_POS_Y = oPlrCardHolder.y
+CARD_INIT_POS_X = 240
+CARD_INIT_POS_Y = oPlrCardHolder.y
 	
 #endregion
 #region function definition
 
-function addCard(cStr){
-	array_push(cards, instance_create_layer(CARD_INIT_POS_X, CARD_INIT_POS_Y, "playerLayer", oCard, {numStr : cStr}))
+function addCard(cStr, cVal){
+	array_push(cards, instance_create_layer(CARD_INIT_POS_X, CARD_INIT_POS_Y, "playerLayer", oCard))
 	cards[array_length(cards)-1].numStr = cStr
+	cards[array_length(cards)-1].val = cVal
 
+	updateCard()
+}
+
+function updateCard(){
 	for(var i = 0; i < array_length(cards); i++){
 		cards[i].toX = oPlrCardHolder.x - (oPlrCardHolder.cardGap * (array_length(cards) - 1 - i))
 		cards[i].defY = CARD_INIT_POS_Y	
@@ -24,8 +29,7 @@ function addCard(cStr){
 cards = []
 
 for(var i = 0; i < 3; i++){
-	addCard(string(i))
-	
+	addCard(string(i),i)
 }
 
 // should appear 0 1 2

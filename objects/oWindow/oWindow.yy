@@ -29,7 +29,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"pttWindow",
+    "path":"sprites/pttWindow/pttWindow.yy",
+  },
   "spriteMaskId":null,
-  "visible":true,
+  "visible":false,
 }

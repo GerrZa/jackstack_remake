@@ -1,4 +1,4 @@
-draw_sprite(sCard, 0, x, renY)
+draw_sprite(pttCard, 0, x, renY)
 
 draw_set_colour(c_red)
 draw_set_font(fDefFont)
