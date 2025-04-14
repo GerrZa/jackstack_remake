@@ -1,0 +1,49 @@
+[gd_scene load_steps=3 format=3 uid="uid://yriqcto2yb11"]
+
+[ext_resource type="PackedScene" uid="uid://c0lw4w5pcs53g" path="res://src/obj/plr_card.tscn" id="1_4lbv0"]
+
+[sub_resource type="GDScript" id="GDScript_4lbv0"]
+resource_name = "plr_card_pos"
+script/source = "extends Marker2D
+
+const CARD_GAP = 16
+
+func _ready() -> void:
+	update_card()
+
+func add_card(card, init := false):
+	add_child(card)
+	update_card()
+
+func update_card():
+	var i = get_child_count() - 1
+	for c in get_children():
+		c.toPos = Vector2(-i * CARD_GAP, 0)
+		
+		i-=1
+
+func _process(delta: float) -> void:
+	for c in get_children():
+		c.spr_to_off_y = 0
+	
+	var reverse_children = get_children()
+	reverse_children.reverse()
+	
+	for c in reverse_children:
+		if c.mouse_in:
+			c.spr_to_off_y = -16
+			break
+"
+
+[node name="game" type="Node2D"]
+
+[node name="plr_card_mark" type="Marker2D" parent="."]
+position = Vector2(209, 141)
+gizmo_extents = 16.0
+script = SubResource("GDScript_4lbv0")
+
+[node name="plr_card" parent="plr_card_mark" instance=ExtResource("1_4lbv0")]
+
+[node name="plr_card2" parent="plr_card_mark" instance=ExtResource("1_4lbv0")]
+
+[node name="plr_card3" parent="plr_card_mark" instance=ExtResource("1_4lbv0")]

@@ -1,0 +1,123 @@
+[gd_scene load_steps=5 format=3 uid="uid://yriqcto2yb11"]
+
+[ext_resource type="Texture2D" uid="uid://dgbnbi1u6dlpj" path="res://icon.svg" id="1_4lbv0"]
+[ext_resource type="Texture2D" uid="uid://bulijj33l3x6g" path="res://asset/obj/minus_token.png" id="2_n5oag"]
+
+[sub_resource type="GDScript" id="GDScript_j1ehk"]
+resource_name = "game"
+script/source = "extends Node2D
+
+var plr_hold_card = null
+"
+
+[sub_resource type="GDScript" id="GDScript_4lbv0"]
+resource_name = "plr_card_pos"
+script/source = "extends Marker2D
+
+const CARD_GAP = 16
+var hover_offset = 8
+
+var card = preload(\"res://src/obj/plr_card.tscn\")
+const card_init_pos = Vector2(50,0)
+
+var self_init_pos = Vector2()
+var self_offset_y = 0
+
+func _ready() -> void:
+	self_init_pos = position
+	update_card()
+
+func add_card(card, init := true):
+	if init:
+		card.position = card_init_pos
+	add_child(card)
+	update_card()
+
+func update_card():
+	var i = get_child_count() - 1
+	for c in get_children():
+		c.to_pos = Vector2(-i * CARD_GAP, 0)
+		
+		i-=1
+
+func _process(delta: float) -> void:
+	#reset things
+	for c in get_children():
+		c.spr_to_offset_y = 0
+	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+	
+	#card checking
+	var reverse_children = get_children()
+	reverse_children.reverse()
+	
+	if get_parent().plr_hold_card == null:
+		for c in reverse_children:
+			if c.mouse_in:
+				c.spr_to_offset_y = -hover_offset
+				Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
+				if Input.is_action_just_pressed(\"m1\") and get_parent().plr_hold_card == null:
+					c.reparent(get_tree().current_scene)
+					c.to_pos = Vector2(120 + 16,100)
+					c.spr_to_offset_y = 0
+					
+					get_parent().plr_hold_card = c
+					
+					update_card()
+				break
+	
+	#update stuff
+	if get_parent().plr_hold_card != null:
+		self_offset_y = 16
+	else:
+		self_offset_y = 0
+	
+	position += ((self_init_pos + Vector2(0, self_offset_y)) - position) * 0.1
+	
+	#debug card add
+	if Input.is_action_just_pressed(\"ui_accept\"):
+		var card_ins = card.instantiate()
+		card_ins.value = 13
+		
+		add_card(card_ins)
+	
+	if Input.is_action_just_pressed(\"m2\") and get_parent().plr_hold_card:
+		get_parent().plr_hold_card.reparent(self)
+		add_card(get_parent().plr_hold_card, false)
+		
+		get_parent().plr_hold_card = null
+	
+"
+
+[node name="game" type="Node2D"]
+script = SubResource("GDScript_j1ehk")
+
+[node name="stack" type="Node2D" parent="."]
+position = Vector2(120, 90)
+
+[node name="Icon" type="Sprite2D" parent="stack"]
+scale = Vector2(0.28125, 0.28125)
+texture = ExtResource("1_4lbv0")
+
+[node name="plr_card_mark" type="Marker2D" parent="."]
+position = Vector2(209, 141)
+gizmo_extents = 16.0
+script = SubResource("GDScript_4lbv0")
+
+[node name="plr_token_mark" type="Marker2D" parent="."]
+position = Vector2(215, 85)
+gizmo_extents = 16.0
+
+[node name="MinusToken" type="Sprite2D" parent="plr_token_mark"]
+position = Vector2(0, 17)
+texture = ExtResource("2_n5oag")
+centered = false
+
+[node name="MinusToken2" type="Sprite2D" parent="plr_token_mark"]
+position = Vector2(0, 12)
+texture = ExtResource("2_n5oag")
+centered = false
+
+[node name="MinusToken3" type="Sprite2D" parent="plr_token_mark"]
+position = Vector2(0, 7)
+texture = ExtResource("2_n5oag")
+centered = false
