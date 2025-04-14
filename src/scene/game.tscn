@@ -30,7 +30,9 @@ func _ready() -> void:
 func add_card(card, init := true):
 	if init:
 		card.position = card_init_pos
-	add_child(card)
+		add_child(card)
+	else:
+		card.reparent(self)
 	update_card()
 
 func update_card():
