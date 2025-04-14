@@ -1,0 +1,61 @@
+[gd_scene load_steps=6 format=3 uid="uid://dj0hccilbfjp4"]
+
+[ext_resource type="Texture2D" uid="uid://ccj7i0yp01btk" path="res://asset/obj/minus_token_2.png" id="1_jt2gj"]
+
+[sub_resource type="GDScript" id="GDScript_jt2gj"]
+script/source = "extends Area2D
+
+var to_pos = Vector2()
+var mouse_in = false
+
+
+func _ready() -> void:
+	#connect signal
+	connect(\"mouse_entered\", func(): mouse_in = true)
+	connect(\"mouse_exited\", func(): mouse_in = false)
+	
+
+func _process(delta: float) -> void:
+	position += (to_pos - position) * 0.1
+"
+
+[sub_resource type="Shader" id="Shader_jt2gj"]
+code = "shader_type canvas_item;
+
+void vertex() {
+	// Called for every vertex the material is visible on.
+}
+
+void fragment() {
+	COLOR.rgb = vec3(0);
+	COLOR.a = COLOR.a * 0.2;
+}
+
+//void light() {
+//	// Called for every pixel for every light affecting the CanvasItem.
+//	// Uncomment to replace the default light processing function with this one.
+//}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0rwn8"]
+shader = SubResource("Shader_jt2gj")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s6n6n"]
+size = Vector2(30, 30)
+
+[node name="token" type="Area2D"]
+script = SubResource("GDScript_jt2gj")
+
+[node name="token_spr" type="Sprite2D" parent="."]
+texture = ExtResource("1_jt2gj")
+centered = false
+
+[node name="token_shadow" type="Sprite2D" parent="token_spr"]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_0rwn8")
+position = Vector2(15, 16)
+texture = ExtResource("1_jt2gj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(15, 15)
+shape = SubResource("RectangleShape2D_s6n6n")

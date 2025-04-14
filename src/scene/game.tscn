@@ -1,14 +1,104 @@
-[gd_scene load_steps=5 format=3 uid="uid://yriqcto2yb11"]
+[gd_scene load_steps=8 format=3 uid="uid://yriqcto2yb11"]
 
 [ext_resource type="Texture2D" uid="uid://dgbnbi1u6dlpj" path="res://icon.svg" id="1_4lbv0"]
-[ext_resource type="Texture2D" uid="uid://bulijj33l3x6g" path="res://asset/obj/minus_token.png" id="2_n5oag"]
+[ext_resource type="FontFile" uid="uid://m0vw8abk7pln" path="res://asset/Mystery Font.ttf" id="2_v5eom"]
 
 [sub_resource type="GDScript" id="GDScript_j1ehk"]
 resource_name = "game"
 script/source = "extends Node2D
 
-var plr_hold_card = null
+var plr_hold_card = null #node path
+
+var stack_path : NodePath
+var plr_card_mark_path : NodePath
+var plr_token_mark_path : NodePath
+
+var card_start_c = 5
+var token_start_c = 3
+
+var timebetween_card_setup = 0.2
+var timebetween_token_setup = 0.4
+
+var card = preload(\"res://src/obj/plr_card.tscn\")
+var token = preload(\"res://src/obj/minus_token.tscn\")
+
+func _ready() -> void:
+	stack_path = get_node(\"stack\").get_path()
+	plr_card_mark_path = get_node(\"plr_card_mark\").get_path()
+	plr_token_mark_path = get_node(\"plr_token_mark\").get_path()
+	
+	setup()
+
+func setup():
+	var card_setup = func():
+		for i in range(card_start_c):
+			var card_ins = card.instantiate()
+			randomize()
+			
+			card_ins.value = randi_range(1,12) #get random card value
+			
+			if card_ins.value >= 10:
+				card_ins.value = randi_range(10,13)
+			
+			$plr_card_mark.add_card(card_ins)
+			
+			await get_tree().create_timer(timebetween_card_setup).timeout
+	
+	var token_setup = func():
+		for i in range(token_start_c):
+			var tok_ins = token.instantiate()
+			randomize()
+			
+			$plr_token_mark.add_token()
+			
+			await get_tree().create_timer(timebetween_token_setup).timeout
+	
+	card_setup.call()
+	token_setup.call()
+	
+
+func _process(delta: float) -> void:
+	print(stack_path)
+	
+	if plr_hold_card != null:
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+	
+	if Input.is_action_just_pressed(\"ui_up\"):
+		plr_hold_card = get_child(0)
+	
+	#if holded card have been hovering
+	if plr_hold_card != null and plr_hold_card.mouse_in:
+		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
+		if Input.is_action_just_pressed(\"m1\"):
+			get_node(stack_path).stack_sum += plr_hold_card.real_value
+			plr_hold_card.queue_free()
+			plr_hold_card = null
+			
+			var card_ins = card.instantiate()
+			
+			randomize()
+			card_ins.value = randi_range(1,12) #get random card value
+			
+			if card_ins.value >= 10:
+				card_ins.value = randi_range(10,13)
+			
+			$plr_card_mark.add_card(card_ins)
 "
+
+[sub_resource type="GDScript" id="GDScript_qih31"]
+script/source = "extends Node2D
+
+var stack_sum = 0
+
+func _process(delta: float) -> void:
+	$stack_num.text = var_to_str(stack_sum) + \" / 21\"
+"
+
+[sub_resource type="LabelSettings" id="LabelSettings_e3hox"]
+font = ExtResource("2_v5eom")
+font_size = 8
+outline_size = 2
+outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="GDScript" id="GDScript_4lbv0"]
 resource_name = "plr_card_pos"
@@ -46,29 +136,31 @@ func _process(delta: float) -> void:
 	#reset things
 	for c in get_children():
 		c.spr_to_offset_y = 0
-	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+	
+	if get_parent().plr_hold_card == null:
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 	
 	#card checking
 	var reverse_children = get_children()
 	reverse_children.reverse()
 	
 	if get_parent().plr_hold_card == null:
-		for c in reverse_children:
+		for c in reverse_children: #check if atleast one card have been hover
 			if c.mouse_in:
 				c.spr_to_offset_y = -hover_offset
 				Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
-				if Input.is_action_just_pressed(\"m1\") and get_parent().plr_hold_card == null:
-					c.reparent(get_tree().current_scene)
+				if Input.is_action_just_pressed(\"m1\") and get_parent().plr_hold_card == null: #when click on card
+					c.reparent(get_tree().current_scene) #reparent the card to be out of hand
 					c.to_pos = Vector2(120 + 16,100)
 					c.spr_to_offset_y = 0
 					
-					get_parent().plr_hold_card = c
+					get_parent().plr_hold_card = c #set hold card to the card
 					
 					update_card()
 				break
 	
 	#update stuff
-	if get_parent().plr_hold_card != null:
+	if get_parent().plr_hold_card != null: # lower the card hand when already choose card (and when enemy is choosing later)
 		self_offset_y = 16
 	else:
 		self_offset_y = 0
@@ -78,16 +170,98 @@ func _process(delta: float) -> void:
 	#debug card add
 	if Input.is_action_just_pressed(\"ui_accept\"):
 		var card_ins = card.instantiate()
-		card_ins.value = 13
+		
+		randomize()
+		card_ins.value = randi_range(1,12) #get random card value
+		
+		if card_ins.value >= 10:
+			card_ins.value = randi_range(10,13)
 		
 		add_card(card_ins)
 	
-	if Input.is_action_just_pressed(\"m2\") and get_parent().plr_hold_card:
-		get_parent().plr_hold_card.reparent(self)
+	if Input.is_action_just_pressed(\"m2\") and get_parent().plr_hold_card != null: #return card when pressing m2
+		get_parent().plr_hold_card.reparent(self) #reparenting back
 		add_card(get_parent().plr_hold_card, false)
 		
 		get_parent().plr_hold_card = null
 	
+"
+
+[sub_resource type="GDScript" id="GDScript_n5oag"]
+resource_name = "token_mark"
+script/source = "extends Marker2D
+
+const TOKEN_GAP = 10
+
+var to_pos = Vector2()
+
+var self_init_pos = Vector2()
+var self_offset_x = -8 #when not active
+
+var card = preload(\"res://src/obj/plr_card.tscn\")
+var token = preload(\"res://src/obj/minus_token.tscn\")
+
+func _ready() -> void:
+	self_init_pos = position #set init position for reference
+	update_token() #update token position
+
+func add_token():
+	var tok_ins = token.instantiate()
+	tok_ins.position = position + Vector2(100,0)
+	
+	add_child(tok_ins)
+	
+	update_token()
+
+func update_token():
+	var i = 0
+	
+	var reverse_children = get_children()
+	reverse_children.reverse()
+	
+	for t in reverse_children:
+		t.to_pos = Vector2(0, TOKEN_GAP * i)
+		
+		i+=1
+
+func _process(delta: float) -> void:
+	if get_parent().plr_hold_card != null:
+		if get_parent().plr_hold_card.mouse_in == false:
+			Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+		
+		for t in get_children():
+			t.to_pos.x = 0
+	
+		for t in get_children(): #check for every token if atleast one have been hovering
+			if t.mouse_in:
+				Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
+				get_child(-1).to_pos.x = -8
+				if Input.is_action_just_pressed(\"m1\"): #if pressing on any token, remove the top one
+					print(get_child(-1))
+					get_child(-1).queue_free()
+					
+					get_node(get_parent().stack_path).stack_sum -= get_parent().plr_hold_card.real_value
+					
+					get_parent().plr_hold_card.queue_free()
+					get_parent().plr_hold_card = null
+					
+					var card_ins = card.instantiate()
+					randomize()
+					
+					card_ins.value = randi_range(1,12) #get random card value
+					
+					if card_ins.value >= 10:
+						card_ins.value = randi_range(10,13)
+					
+					get_node(get_parent().plr_card_mark_path).add_card(card_ins)
+					break
+	
+	if get_parent().plr_hold_card == null:
+		to_pos = self_init_pos
+	else:
+		to_pos = self_init_pos + Vector2(self_offset_x, 0)
+	
+	position += (to_pos - position) * 0.1
 "
 
 [node name="game" type="Node2D"]
@@ -95,10 +269,22 @@ script = SubResource("GDScript_j1ehk")
 
 [node name="stack" type="Node2D" parent="."]
 position = Vector2(120, 90)
+script = SubResource("GDScript_qih31")
 
 [node name="Icon" type="Sprite2D" parent="stack"]
+self_modulate = Color(0.427493, 0.427493, 0.427493, 1)
 scale = Vector2(0.28125, 0.28125)
 texture = ExtResource("1_4lbv0")
+
+[node name="stack_num" type="Label" parent="stack"]
+offset_left = -18.0
+offset_top = -18.0
+offset_right = 18.0
+offset_bottom = 18.0
+text = "123"
+label_settings = SubResource("LabelSettings_e3hox")
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="plr_card_mark" type="Marker2D" parent="."]
 position = Vector2(209, 141)
@@ -106,20 +292,6 @@ gizmo_extents = 16.0
 script = SubResource("GDScript_4lbv0")
 
 [node name="plr_token_mark" type="Marker2D" parent="."]
-position = Vector2(215, 85)
+position = Vector2(230, 106)
 gizmo_extents = 16.0
-
-[node name="MinusToken" type="Sprite2D" parent="plr_token_mark"]
-position = Vector2(0, 17)
-texture = ExtResource("2_n5oag")
-centered = false
-
-[node name="MinusToken2" type="Sprite2D" parent="plr_token_mark"]
-position = Vector2(0, 12)
-texture = ExtResource("2_n5oag")
-centered = false
-
-[node name="MinusToken3" type="Sprite2D" parent="plr_token_mark"]
-position = Vector2(0, 7)
-texture = ExtResource("2_n5oag")
-centered = false
+script = SubResource("GDScript_n5oag")
