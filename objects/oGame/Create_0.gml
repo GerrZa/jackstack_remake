@@ -1,17 +1,19 @@
-global.delta_factor = 1
-#macro delta global.delta_factor
 
-//game_set_speed(10, gamespeed_fps)
+global.delta_timing = 1
+#macro delta global.delta_timing
 
-enum STATE{
+plrHoldX = 120 - sprite_get_width(pttCard)
+plrHoldY = 120 - sprite_get_height(pttCard)
+
+plrHoldCard = -1
+
+enum S{
 	NONE,
-	pCARD,
-	pTOKEN,
-	eCARD,
-	eTOKEN,
+	PCARD,
+	PTOKEN,
+	ECARD,
+	ETOKEN,
 	GAMEOVER
 }
 
-state = STATE.pCARD
-
-plrCardSelect = -1
+state = S.PCARD

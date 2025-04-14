@@ -1,1 +1,0 @@
-addCard("K")

@@ -1,39 +1,50 @@
-#region fixed variable
+#region //function definition
 
-CARD_INIT_POS_X = 240
-CARD_INIT_POS_Y = oPlrCardHolder.y
+function updateCard(){
+	//for(var i = 0; i < array_length(plrCard); i++){
+	//	plrCard[i].toX = CARD_START_X - (i * CARD_GAP)
+	//	plrCard[i].toY = CARD_START_Y
+		
+	//	plrCard[i].depth = i
+	//}
 	
-#endregion
-#region function definition
+	for(var i = 0; i < array_length(plrCard); i++){
+		var ii = array_length(plrCard) - 1 - i
+		plrCard[i].toX = CARD_START_X - (ii * CARD_GAP)
+		plrCard[i].toY = CARD_START_Y
+		
+		plrCard[i].depth = -i
+	}
+}
 
-function addCard(cStr, cVal){
-	array_push(cards, instance_create_layer(CARD_INIT_POS_X, CARD_INIT_POS_Y, "playerLayer", oCard))
-	cards[array_length(cards)-1].numStr = cStr
-	cards[array_length(cards)-1].val = cVal
+
+function addNewCard(nVal){
+	array_push(plrCard, instance_create_layer(CARD_INIT_X, CARD_INIT_Y, "instances", oCard))
+	with(plrCard[array_length(plrCard) - 1]){cardVal = nVal}
 
 	updateCard()
 }
 
-function updateCard(){
-	for(var i = 0; i < array_length(cards); i++){
-		cards[i].toX = oPlrCardHolder.x - (oPlrCardHolder.cardGap * (array_length(cards) - 1 - i))
-		cards[i].defY = CARD_INIT_POS_Y	
-		cards[i].renY = CARD_INIT_POS_Y
-
-		cards[i].depth = -i
-	}
+function addCardBackID(cID){
+	array_push(plrCard, cID)
+	updateCard()
 }
 
 #endregion
 
-cards = []
+plrCard = []
 
-for(var i = 0; i < 3; i++){
-	addCard(string(i),i)
-}
+CARD_INIT_X = room_width
+CARD_INIT_Y = y
 
-// should appear 0 1 2
+//where card should start sorting at
+CARD_START_X = x
+CARD_START_Y = y
 
-show_debug_message(cards[0].numStr)
-show_debug_message(cards[1].numStr)
-show_debug_message(cards[2].numStr)
+//gap between each card
+CARD_GAP = 16
+
+
+addNewCard(1)
+addNewCard(2)
+addNewCard(3)

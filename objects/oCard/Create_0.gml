@@ -1,10 +1,11 @@
-numStr = "-1"
-val = 1
+toX = 0
+toY = 0
 
-toX = 0 // where x suppose to be
-defY = 0 // baseline of Y when in hand
-offY = 0 // baseline 
+offY = 0
+toOffY = 0
+
+renX = 0
 renY = 0
-selecting = false
 
-testVar = false
+cardChar = ["NaN","A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+cardVal = 0
