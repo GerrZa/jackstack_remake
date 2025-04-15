@@ -16,7 +16,7 @@ func _ready() -> void:
 	
 
 func _process(delta: float) -> void:
-	position += (to_pos - position) * 0.1
+	position += (to_pos - position) * 0.2
 "
 
 [sub_resource type="Shader" id="Shader_jt2gj"]
@@ -40,8 +40,8 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_0rwn8"]
 shader = SubResource("Shader_jt2gj")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_s6n6n"]
-size = Vector2(30, 30)
+[sub_resource type="CircleShape2D" id="CircleShape2D_jt2gj"]
+radius = 16.0312
 
 [node name="token" type="Area2D"]
 script = SubResource("GDScript_jt2gj")
@@ -58,4 +58,4 @@ texture = ExtResource("1_jt2gj")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(15, 15)
-shape = SubResource("RectangleShape2D_s6n6n")
+shape = SubResource("CircleShape2D_jt2gj")

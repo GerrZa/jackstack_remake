@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://bjbwp7o64a1yd"]
+
+[sub_resource type="GDScript" id="GDScript_lij8n"]
+script/source = "extends Node2D
+
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed(\"ui_accept\"):
+		get_tree().change_scene_to_file(\"res://src/scene/game.tscn\")
+"
+
+[node name="StandbyScene" type="Node2D"]
+script = SubResource("GDScript_lij8n")

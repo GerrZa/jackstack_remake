@@ -1,8 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://yriqcto2yb11"]
+[gd_scene load_steps=8 format=3 uid="uid://yriqcto2yb11"]
 
 [ext_resource type="Texture2D" uid="uid://dgbnbi1u6dlpj" path="res://icon.svg" id="1_4lbv0"]
 [ext_resource type="FontFile" uid="uid://m0vw8abk7pln" path="res://asset/Mystery Font.ttf" id="2_v5eom"]
-[ext_resource type="Texture2D" uid="uid://cdcgwtohlisik" path="res://asset/obj/plr_hp_coin.png" id="3_qih31"]
 
 [sub_resource type="GDScript" id="GDScript_j1ehk"]
 resource_name = "game"
@@ -27,10 +26,9 @@ var token = preload(\"res://src/obj/minus_token.tscn\")
 #parts
 var circle_parts = preload(\"res://src/parts/circle_explode.tscn\")
 var line_parts = preload(\"res://src/parts/line_explode.tscn\")
-#const WHITE_COLOR = Color.DARK_SEA_GREEN
-const WHITE_COLOR = Color.GREEN
+const WHITE_COLOR = Color.PALE_GREEN
 
-var turn = \"g\" # p for player, e for enemy, g for game state(no one can do anything)
+var turn = \"p\"
 
 func _ready() -> void:
 	stack_path = get_node(\"stack\").get_path()
@@ -54,7 +52,7 @@ func setup():
 			
 			await get_tree().create_timer(timebetween_card_setup).timeout
 		
-		turn = \"p\"
+		setup_complete = true
 	
 	var token_setup = func():
 		for i in range(token_start_c):
@@ -126,12 +124,10 @@ var circles = []
 
 #each circle var random range
 var radius_range = Vector2(12,16)
-var speed_range = Vector2(0.4,0.6)
+var speed_range = Vector2(0.2,0.3)
 var decrease_range = Vector2(0.9, 0.95)
 
 var init_circles_range = Vector2(14,17)
-
-var hover_str = \"\"
 
 func _ready() -> void:
 	randomize()
@@ -236,7 +232,7 @@ func _process(delta: float) -> void:
 	var reverse_children = get_children()
 	reverse_children.reverse()
 	
-	if get_parent().plr_hold_card == null and get_parent().turn == \"p\":
+	if get_parent().plr_hold_card == null and get_parent().setup_complete and get_parent().turn == \"p\":
 		for c in reverse_children: #check if atleast one card have been hover
 			if c.mouse_in:
 				c.spr_to_offset_y = -hover_offset
@@ -293,8 +289,7 @@ var self_offset_x = -16 #when not active
 var card = preload(\"res://src/obj/plr_card.tscn\")
 var token = preload(\"res://src/obj/minus_token.tscn\")
 
-#const RED_COLOR = Color(\"ba3e19\")
-const RED_COLOR = Color.RED
+const RED_COLOR = Color(\"ba3e19\")
 
 func _ready() -> void:
 	self_init_pos = position #set init position for reference
@@ -310,15 +305,16 @@ func add_token():
 	update_token()
 
 func update_token():
-	var i = 0
 	
 	var reverse_children = get_children()
 	reverse_children.reverse()
 	
-	for t in get_children():
+	for i in get_child_count():
+		var ii = get_child_count() - i - 1
+		var t = get_children()[ii]
+		
 		t.to_pos = Vector2(0, -TOKEN_GAP * i)
 		
-		i+=1
 
 @warning_ignore(\"unused_parameter\")
 func _process(delta: float) -> void:
@@ -336,12 +332,16 @@ func _process(delta: float) -> void:
 		var reverse_children = get_children()
 		reverse_children.reverse()
 		
-		for t in reverse_children: #check for every token if atleast one have been hovering
+		for i in range(get_child_count()): #check for every token if atleast one have been hovering
+			var ii = get_child_count() - i - 1
+			var t = get_children()[ii]
+			
 			if t.mouse_in:
 				Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
 				t.to_pos.x = -8
 				if Input.is_action_just_pressed(\"m1\"): #if pressing on any token, remove the top one
-					t.reparent(get_tree().current_scene)
+					#t.queue_free()
+					get_children().erase(t)
 					t.queue_free()
 					
 					get_node(get_parent().stack_path).stack_sum -= get_parent().plr_hold_card.real_value
@@ -386,21 +386,8 @@ func _process(delta: float) -> void:
 	position += (to_pos - position) * 0.1
 "
 
-[sub_resource type="GDScript" id="GDScript_v5eom"]
-script/source = "extends Node2D
-"
-
-[sub_resource type="LabelSettings" id="LabelSettings_qih31"]
-font = ExtResource("2_v5eom")
-font_size = 8
-outline_size = 3
-outline_color = Color(0, 0, 0, 1)
-
 [node name="game" type="Node2D"]
 script = SubResource("GDScript_j1ehk")
-
-[node name="Camera2D" type="Camera2D" parent="."]
-anchor_mode = 0
 
 [node name="stack" type="Node2D" parent="."]
 position = Vector2(120, 90)
@@ -432,33 +419,5 @@ position = Vector2(229, 122)
 gizmo_extents = 16.0
 script = SubResource("GDScript_n5oag")
 
-[node name="PlrHpCoin" type="Sprite2D" parent="."]
-position = Vector2(12, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin2" type="Sprite2D" parent="."]
-position = Vector2(24, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin3" type="Sprite2D" parent="."]
-position = Vector2(36, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin4" type="Sprite2D" parent="."]
-position = Vector2(48, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin5" type="Sprite2D" parent="."]
-position = Vector2(60, 174)
-texture = ExtResource("3_qih31")
-
-[node name="mouse_note" type="Node2D" parent="."]
-script = SubResource("GDScript_v5eom")
-
-[node name="value_note" type="Label" parent="mouse_note"]
-offset_left = -44.0
-offset_top = -8.0
-offset_right = 44.0
-text = "test"
-label_settings = SubResource("LabelSettings_qih31")
-horizontal_alignment = 1
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0

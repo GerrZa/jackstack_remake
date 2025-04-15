@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpy16uyy61jh7"]
+
+[sub_resource type="GDScript" id="GDScript_1opsh"]
+script/source = "extends Sprite2D
+
+var speed = 0.9
+var spr_speed = 0.99
+var custom_offset = Vector2.ZERO
+var spr = preload(\"res://icon.svg\")
+
+func _physics_process(delta: float) -> void:
+	scale /= spr_speed
+	self_modulate.a *= speed
+	
+	texture = spr
+	
+	if self_modulate.a < 0.01:
+		queue_free()
+
+func set_att(var_name, value):
+	match var_name:
+		\"speed\":
+			speed = value
+		\"centered\":
+			centered = value
+		\"custom_offset\":
+			centered = false
+			offset = value
+		\"spr\":
+			spr = value
+		\"rotation_degrees\":
+			rotation_degrees = value
+		\"rotation\":
+			rotation = value
+		\"modulate\":
+			modulate = value
+"
+
+[node name="SprExplode" type="Sprite2D"]
+centered = false
+script = SubResource("GDScript_1opsh")

@@ -1,8 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://yriqcto2yb11"]
+[gd_scene load_steps=8 format=3 uid="uid://yriqcto2yb11"]
 
 [ext_resource type="Texture2D" uid="uid://dgbnbi1u6dlpj" path="res://icon.svg" id="1_4lbv0"]
 [ext_resource type="FontFile" uid="uid://m0vw8abk7pln" path="res://asset/Mystery Font.ttf" id="2_v5eom"]
-[ext_resource type="Texture2D" uid="uid://cdcgwtohlisik" path="res://asset/obj/plr_hp_coin.png" id="3_qih31"]
 
 [sub_resource type="GDScript" id="GDScript_j1ehk"]
 resource_name = "game"
@@ -16,7 +15,6 @@ var plr_token_mark_path : NodePath
 
 var card_start_c = 5
 var token_start_c = 3
-var setup_complete = false
 
 var timebetween_card_setup = 0.2
 var timebetween_token_setup = 0.2
@@ -27,10 +25,10 @@ var token = preload(\"res://src/obj/minus_token.tscn\")
 #parts
 var circle_parts = preload(\"res://src/parts/circle_explode.tscn\")
 var line_parts = preload(\"res://src/parts/line_explode.tscn\")
-#const WHITE_COLOR = Color.DARK_SEA_GREEN
-const WHITE_COLOR = Color.GREEN
 
-var turn = \"g\" # p for player, e for enemy, g for game state(no one can do anything)
+var setup_complete = false
+
+var turn = \"p\"
 
 func _ready() -> void:
 	stack_path = get_node(\"stack\").get_path()
@@ -54,7 +52,7 @@ func setup():
 			
 			await get_tree().create_timer(timebetween_card_setup).timeout
 		
-		turn = \"p\"
+		setup_complete = true
 	
 	var token_setup = func():
 		for i in range(token_start_c):
@@ -86,14 +84,14 @@ func _process(delta: float) -> void:
 			randomize()
 			
 			#spawn part on cursor
-			PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":15, \"added_radius\":10, \"speed\": 0.7, \"col\" : WHITE_COLOR})
-			PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":30, \"added_radius\":20, \"speed\": 0.7, \"col\" : WHITE_COLOR})
-			PartSpawner.spawn(\"line_ex\", get_global_mouse_position(), {\"scale\": Vector2(2,2), \"speed\": 0.8, \"rotation_degrees\": randf_range(0, 359), \"modulate\" : WHITE_COLOR})
+			PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":15, \"added_radius\":10, \"speed\": 0.7})
+			PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":30, \"added_radius\":20, \"speed\": 0.7})
+			PartSpawner.spawn(\"line_ex\", get_global_mouse_position(), {\"scale\": Vector2(2,2), \"speed\": 0.8, \"rotation_degrees\": randf_range(0, 359)})
 			
 			
 			PartSpawner.spawn(\"spr_ex\",plr_hold_card.global_position + Vector2(-16,24) , {\"spr\" : load(\"res://asset/obj/ptt_plrcard.png\"), \"centered\": true, \"spr_speed\" : 0.97, \"speed\": 0.7})
 			
-			PartSpawner.spawn(\"circle_ex\", $stack.global_position, {\"radius\":45, \"added_radius\":15, \"col\" : WHITE_COLOR})
+			PartSpawner.spawn(\"circle_ex\", $stack.global_position, {\"radius\":45, \"added_radius\":15})
 			
 			PartSpawner.spawn(\"text_float\", $stack.global_position + Vector2(0,-4), {\"text\": \"+\" + var_to_str(plr_hold_card.real_value), \"color\": Color.CHARTREUSE, \"outline_color\": Color.BLACK})
 			
@@ -109,8 +107,6 @@ func _process(delta: float) -> void:
 				card_ins.value = randi_range(10,13)
 			
 			$plr_card_mark.add_card(card_ins)
-			
-			#turn = \"e\" #change to enemy turn
 "
 
 [sub_resource type="GDScript" id="GDScript_qih31"]
@@ -125,65 +121,23 @@ var t = 0
 var circles = []
 
 #each circle var random range
-var radius_range = Vector2(12,16)
-var speed_range = Vector2(0.4,0.6)
-var decrease_range = Vector2(0.9, 0.95)
-
-var init_circles_range = Vector2(14,17)
-
-var hover_str = \"\"
+var radius_range = range()
+var speed_range = range()
 
 func _ready() -> void:
-	randomize()
-	for i in range(randi_range(init_circles_range.x, init_circles_range.y)):
-		create_circle()
-		
-		randomize()
-		
-		await get_tree().create_timer(randf_range(0.01, 0.05)).timeout
+	pass
 
 func _process(delta: float) -> void:
 	queue_redraw()
+	$stack_num.text = var_to_str(stack_sum) + \" / 21\"
 	
 	t += delta
-	
-	position = Vector2(120, 90) + Vector2(cos(t * 0.5) * 4, sin(t) * 2)
-	
-	$stack_num.text = var_to_str(stack_sum) + \" / 21\"
-	#$stack_num.position = Vector2(-38, -17) + Vector2(cos(t * 0.5) * 5, sin(t) * 3)
 
 func _physics_process(delta: float) -> void:
-	for c in circles:
-		c[\"color\"].a *= c[\"decrease\"]
-		c[\"pos\"] += c[\"dir\"] * c[\"speed\"]
-		c[\"speed\"] *= c[\"decrease\"]
-		
-		if c[\"color\"].a < 0.05:
-			circles.erase(c)
-			
-			create_circle()
+	pass
 
 func _draw() -> void:
-	for c in circles:
-		draw_circle(c[\"pos\"], c[\"radius\"], c[\"color\"], true)
-	
 	draw_circle(Vector2.ZERO, base_radius + (add_radius * cos(t)), Color.WHITE, true)
-
-func create_circle():
-	randomize()
-	var rand_rad = deg_to_rad(randf_range(0, 359))
-	var new_dir = Vector2(cos(rand_rad), sin(rand_rad))
-	
-	var margin = 22
-	
-	circles.append({
-		\"pos\" : Vector2(cos(rand_rad) * margin, sin(rand_rad) * margin),
-		\"dir\" : new_dir,
-		\"speed\" : randf_range(speed_range.x, speed_range.y),
-		\"radius\" : randf_range(radius_range.x, radius_range.y),
-		\"color\" : Color.WHITE,
-		\"decrease\" : randf_range(decrease_range.x, decrease_range.y)
-	})
 "
 
 [sub_resource type="LabelSettings" id="LabelSettings_e3hox"]
@@ -236,7 +190,7 @@ func _process(delta: float) -> void:
 	var reverse_children = get_children()
 	reverse_children.reverse()
 	
-	if get_parent().plr_hold_card == null and get_parent().turn == \"p\":
+	if get_parent().plr_hold_card == null and get_parent().setup_complete and get_parent().turn == \"p\":
 		for c in reverse_children: #check if atleast one card have been hover
 			if c.mouse_in:
 				c.spr_to_offset_y = -hover_offset
@@ -283,7 +237,7 @@ func _process(delta: float) -> void:
 resource_name = "token_mark"
 script/source = "extends Marker2D
 
-const TOKEN_GAP = 16
+const TOKEN_GAP = 10
 
 var to_pos = Vector2()
 
@@ -293,19 +247,15 @@ var self_offset_x = -16 #when not active
 var card = preload(\"res://src/obj/plr_card.tscn\")
 var token = preload(\"res://src/obj/minus_token.tscn\")
 
-#const RED_COLOR = Color(\"ba3e19\")
-const RED_COLOR = Color.RED
-
 func _ready() -> void:
 	self_init_pos = position #set init position for reference
 	update_token() #update token position
 
 func add_token():
 	var tok_ins = token.instantiate()
-	add_child(tok_ins)
+	tok_ins.position = position + Vector2(100,0)
 	
-	tok_ins.position = position + Vector2(32, -TOKEN_GAP * get_child_count())
-	#print((-TOKEN_GAP) * (get_child_count()-1))
+	add_child(tok_ins)
 	
 	update_token()
 
@@ -315,50 +265,43 @@ func update_token():
 	var reverse_children = get_children()
 	reverse_children.reverse()
 	
-	for t in get_children():
-		t.to_pos = Vector2(0, -TOKEN_GAP * i)
+	for t in reverse_children:
+		t.to_pos = Vector2(0, TOKEN_GAP * i)
 		
 		i+=1
 
 @warning_ignore(\"unused_parameter\")
 func _process(delta: float) -> void:
-	if Input.is_action_just_pressed(\"ui_down\"):
-		#add_token()
-		update_token()
-	
 	if get_parent().plr_hold_card != null and get_parent().turn == \"p\":
 		if get_parent().plr_hold_card.mouse_in == false:
 			Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 		
 		for t in get_children():
 			t.to_pos.x = 0
-		
-		var reverse_children = get_children()
-		reverse_children.reverse()
-		
-		for t in reverse_children: #check for every token if atleast one have been hovering
+	
+		for t in get_children(): #check for every token if atleast one have been hovering
 			if t.mouse_in:
 				Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
-				t.to_pos.x = -8
+				get_child(-1).to_pos.x = -8
 				if Input.is_action_just_pressed(\"m1\"): #if pressing on any token, remove the top one
-					t.reparent(get_tree().current_scene)
-					t.queue_free()
+					print(get_child(-1))
+					get_child(-1).queue_free()
 					
 					get_node(get_parent().stack_path).stack_sum -= get_parent().plr_hold_card.real_value
 					
 					randomize()
 					
 					#spawn part on cursor
-					PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":15, \"added_radius\":10, \"speed\": 0.7, \"col\" : RED_COLOR})
-					PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":30, \"added_radius\":20, \"speed\": 0.7, \"col\" : RED_COLOR})
-					PartSpawner.spawn(\"line_ex\", get_global_mouse_position(), {\"scale\": Vector2(2,2), \"speed\": 0.8, \"rotation_degrees\": randf_range(0, 359), \"modulate\" : RED_COLOR})
+					PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":15, \"added_radius\":10, \"speed\": 0.7, \"col\" : Color.RED})
+					PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":30, \"added_radius\":20, \"speed\": 0.7, \"col\" : Color.RED})
+					PartSpawner.spawn(\"line_ex\", get_global_mouse_position(), {\"scale\": Vector2(2,2), \"speed\": 0.8, \"rotation_degrees\": randf_range(0, 359), \"modulate\" : Color.RED})
 					
 					
-					PartSpawner.spawn(\"spr_ex\",get_parent().plr_hold_card.global_position + Vector2(-16,24) , {\"spr\" : load(\"res://asset/obj/ptt_plrcard.png\"), \"centered\": true, \"spr_speed\" : 0.97, \"speed\": 0.7, \"modulate\": RED_COLOR})
+					PartSpawner.spawn(\"spr_ex\",get_parent().plr_hold_card.global_position + Vector2(-16,24) , {\"spr\" : load(\"res://asset/obj/ptt_plrcard.png\"), \"centered\": true, \"spr_speed\" : 0.97, \"speed\": 0.7, \"modulate\": Color.RED})
 					
-					PartSpawner.spawn(\"circle_ex\", get_node(get_parent().stack_path).global_position, {\"radius\":35, \"added_radius\":15, \"col\" : RED_COLOR})
+					PartSpawner.spawn(\"circle_ex\", get_node(get_parent().stack_path).global_position, {\"radius\":35, \"added_radius\":15, \"col\" : Color.RED})
 					
-					PartSpawner.spawn(\"text_float\", get_node(get_parent().stack_path).global_position + Vector2(0,-4), {\"text\": \"-\" + var_to_str(get_parent().plr_hold_card.real_value), \"color\": RED_COLOR, \"outline_color\": Color.BLACK})
+					PartSpawner.spawn(\"text_float\", get_node(get_parent().stack_path).global_position + Vector2(0,-4), {\"text\": \"-\" + var_to_str(get_parent().plr_hold_card.real_value), \"color\": Color.RED, \"outline_color\": Color.BLACK})
 					
 					get_parent().plr_hold_card.queue_free()
 					get_parent().plr_hold_card = null
@@ -372,11 +315,7 @@ func _process(delta: float) -> void:
 						card_ins.value = randi_range(10,13)
 					
 					get_node(get_parent().plr_card_mark_path).add_card(card_ins)
-					
-					update_token()
-					#get_parent().turn = \"e\" #change to enemy turn
 					break
-				break
 	
 	if get_parent().plr_hold_card == null or get_parent().turn != \"p\": #when token is not active
 		to_pos = self_init_pos
@@ -386,21 +325,8 @@ func _process(delta: float) -> void:
 	position += (to_pos - position) * 0.1
 "
 
-[sub_resource type="GDScript" id="GDScript_v5eom"]
-script/source = "extends Node2D
-"
-
-[sub_resource type="LabelSettings" id="LabelSettings_qih31"]
-font = ExtResource("2_v5eom")
-font_size = 8
-outline_size = 3
-outline_color = Color(0, 0, 0, 1)
-
 [node name="game" type="Node2D"]
 script = SubResource("GDScript_j1ehk")
-
-[node name="Camera2D" type="Camera2D" parent="."]
-anchor_mode = 0
 
 [node name="stack" type="Node2D" parent="."]
 position = Vector2(120, 90)
@@ -428,37 +354,9 @@ gizmo_extents = 16.0
 script = SubResource("GDScript_4lbv0")
 
 [node name="plr_token_mark" type="Marker2D" parent="."]
-position = Vector2(229, 122)
+position = Vector2(229, 106)
 gizmo_extents = 16.0
 script = SubResource("GDScript_n5oag")
 
-[node name="PlrHpCoin" type="Sprite2D" parent="."]
-position = Vector2(12, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin2" type="Sprite2D" parent="."]
-position = Vector2(24, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin3" type="Sprite2D" parent="."]
-position = Vector2(36, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin4" type="Sprite2D" parent="."]
-position = Vector2(48, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin5" type="Sprite2D" parent="."]
-position = Vector2(60, 174)
-texture = ExtResource("3_qih31")
-
-[node name="mouse_note" type="Node2D" parent="."]
-script = SubResource("GDScript_v5eom")
-
-[node name="value_note" type="Label" parent="mouse_note"]
-offset_left = -44.0
-offset_top = -8.0
-offset_right = 44.0
-text = "test"
-label_settings = SubResource("LabelSettings_qih31")
-horizontal_alignment = 1
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0

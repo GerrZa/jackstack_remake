@@ -1,0 +1,78 @@
+[gd_scene load_steps=3 format=3 uid="uid://cuauq77vdvc58"]
+
+[ext_resource type="FontFile" uid="uid://m0vw8abk7pln" path="res://asset/Mystery Font.ttf" id="1_v43wu"]
+
+[sub_resource type="GDScript" id="GDScript_v43wu"]
+script/source = "extends Node2D
+
+var pos_speed = 0.99 #how fast speed reduce along the time
+var init_speed = 0.5
+var scale_speed = 1 #how fast scale raise along the time
+var init_scale = Vector2(1,1)
+
+var self_speed = 0.9
+
+var color = Color.WHITE
+var outline_color = Color.RED
+
+var text = \"HelloWorld\"
+
+func _ready() -> void:
+	$Label.add_theme_color_override(\"font_color\", color)
+	$Label.add_theme_color_override(\"font_outline_color\", outline_color)
+	
+	$Label.text = text
+
+func _physics_process(delta: float) -> void:
+	scale = init_scale
+	global_position.y -= init_speed
+	
+	$Label.add_theme_color_override(\"font_color\", color)
+	$Label.add_theme_color_override(\"font_outline_color\", outline_color)
+	
+	$Label.text = text
+	
+	init_speed *= pos_speed
+	init_scale /= scale_speed
+	
+	modulate.a *= self_speed
+
+func set_att(var_name, value):
+	match var_name:
+		\"pos_speed\":
+			pos_speed = value
+		\"init_speed\":
+			init_speed = value
+		\"scale_speed\":
+			scale_speed = value
+		\"init_scale\":
+			init_scale = value
+		\"self_speed\":
+			self_speed = value
+		\"color\":
+			color = value
+			$Label.add_theme_color_override(\"font_color\", color)
+		\"outline_color\":
+			outline_color = value
+			$Label.add_theme_color_override(\"font_outline_color\", outline_color)
+		\"text\":
+			text = value
+			$Label.text = text
+"
+
+[node name="TextFloat" type="Node2D"]
+script = SubResource("GDScript_v43wu")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -120.0
+offset_top = -4.0
+offset_right = 120.0
+offset_bottom = 4.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("1_v43wu")
+theme_override_font_sizes/font_size = 8
+text = "Lorem ipsom something idk"
+horizontal_alignment = 1
+vertical_alignment = 1

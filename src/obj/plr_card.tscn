@@ -28,7 +28,11 @@ func _process(delta: float) -> void:
 	position += (to_pos - position) * 0.1
 	
 	$card_spr.offset.y = lerp($card_spr.offset.y, float(spr_to_offset_y), 0.2)
-	$val_label.position.y = 2 + $card_spr.offset.y
+	
+	$val_label.position.y = 3 + $card_spr.offset.y
+	if (value == 10):
+		$val_label.position.x = -30
+	
 	$card_spr/card_shadow.offset.y = $card_spr.offset.y
 	
 "
@@ -69,7 +73,7 @@ centered = false
 [node name="card_shadow" type="Sprite2D" parent="card_spr"]
 show_behind_parent = true
 material = SubResource("ShaderMaterial_uharv")
-position = Vector2(-1, 0)
+position = Vector2(-1, 1)
 texture = ExtResource("1_52ygu")
 centered = false
 
@@ -78,9 +82,9 @@ position = Vector2(-16, 24)
 shape = SubResource("RectangleShape2D_4lbv0")
 
 [node name="val_label" type="Label" parent="."]
-offset_left = -29.0
+offset_left = -28.0
 offset_top = 3.0
-offset_right = -18.0
+offset_right = -17.0
 offset_bottom = 13.0
 theme_override_colors/font_color = Color(0.568627, 0.0901961, 0.0901961, 1)
 theme_override_fonts/font = ExtResource("2_52ygu")
