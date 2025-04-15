@@ -1,0 +1,37 @@
+[gd_scene load_steps=2 format=3 uid="uid://bftbqi8qtg2bf"]
+
+[sub_resource type="GDScript" id="GDScript_d11vu"]
+script/source = "extends Node2D
+
+var radius = 30
+var added_radius = 10
+var col = Color.WHITE
+var speed = 0.8 # 0.01 - 0.99, higher -> slower
+
+func _physics_process(delta: float) -> void:
+	queue_redraw()
+	added_radius *= speed
+	
+	col = Color(col.r, col.g, col.b, col.a * speed)
+	
+	if col.a < 0.01:
+		queue_free()
+
+func _draw() -> void:
+	draw_circle(Vector2.ZERO, radius - added_radius, col, false, 2)
+
+func set_att(var_name, value):
+	match  var_name:
+		\"radius\":
+			radius = value
+		\"added_radius\":
+			added_radius = value
+		\"col\":
+			col = value
+		\"speed\":
+			speed = value
+"
+
+[node name="CircleExplode" type="Node2D"]
+z_index = 10
+script = SubResource("GDScript_d11vu")

@@ -10,10 +10,14 @@ config_version=5
 
 [application]
 
-config/name="New Game Project"
+config/name="Jack stack remake"
 run/main_scene="uid://yriqcto2yb11"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+PartSpawner="*res://src/parts/part_spawner.gd"
 
 [display]
 

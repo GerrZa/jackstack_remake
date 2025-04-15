@@ -1,0 +1,98 @@
+[gd_scene load_steps=2 format=3 uid="uid://0k8m0hls0b7m"]
+
+[sub_resource type="GDScript" id="GDScript_1c485"]
+script/source = "extends Node2D
+
+var speed = 0.9 #0.01 - 0.99, higher slower
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _physics_process(delta: float) -> void:
+	for l in get_children():
+		l.global_position += Vector2(cos(l.rotation), sin(l.rotation)) * l.self_modulate.a * (1.5 - l.scale.x)
+		l.modulate.a *= speed
+
+func set_att(var_name, value):
+	match var_name:
+		\"scale\":
+			scale = value
+		\"speed\":
+			speed = value
+"
+
+[node name="LineExplode" type="Node2D"]
+script = SubResource("GDScript_1c485")
+
+[node name="line" type="Marker2D" parent="."]
+
+[node name="Polygon2D" type="Polygon2D" parent="line"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line2" type="Marker2D" parent="."]
+rotation = 0.785398
+scale = Vector2(0.58279, 0.544886)
+
+[node name="Polygon2D" type="Polygon2D" parent="line2"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line3" type="Marker2D" parent="."]
+rotation = -2.35619
+scale = Vector2(0.956665, 1.01626)
+
+[node name="Polygon2D" type="Polygon2D" parent="line3"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line4" type="Marker2D" parent="."]
+rotation = -1.309
+scale = Vector2(0.688181, 0.829223)
+
+[node name="Polygon2D" type="Polygon2D" parent="line4"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line5" type="Marker2D" parent="."]
+rotation = 1.309
+scale = Vector2(0.242912, 0.185781)
+
+[node name="Polygon2D" type="Polygon2D" parent="line5"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line6" type="Marker2D" parent="."]
+rotation = 2.61799
+scale = Vector2(0.701672, 0.481507)
+
+[node name="Polygon2D" type="Polygon2D" parent="line6"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line7" type="Marker2D" parent="."]
+rotation = 1.8326
+scale = Vector2(0.855406, 0.587003)
+
+[node name="Polygon2D" type="Polygon2D" parent="line7"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line8" type="Marker2D" parent="."]
+rotation = 3.14159
+scale = Vector2(0.527706, 0.331204)
+
+[node name="Polygon2D" type="Polygon2D" parent="line8"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line9" type="Marker2D" parent="."]
+rotation = 4.45059
+scale = Vector2(0.151628, 0.249252)
+
+[node name="Polygon2D" type="Polygon2D" parent="line9"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line10" type="Marker2D" parent="."]
+rotation = 9.16298
+scale = Vector2(0.414955, 0.288878)
+
+[node name="Polygon2D" type="Polygon2D" parent="line10"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
+
+[node name="line11" type="Marker2D" parent="."]
+rotation = 11.781
+scale = Vector2(0.523831, 0.34426)
+
+[node name="Polygon2D" type="Polygon2D" parent="line11"]
+polygon = PackedVector2Array(0, 0, 5, -1, 12, 0, 7, 1)
