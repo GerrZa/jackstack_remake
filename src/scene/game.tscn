@@ -1,8 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://yriqcto2yb11"]
+[gd_scene load_steps=17 format=3 uid="uid://yriqcto2yb11"]
 
 [ext_resource type="Texture2D" uid="uid://dgbnbi1u6dlpj" path="res://icon.svg" id="1_4lbv0"]
 [ext_resource type="FontFile" uid="uid://m0vw8abk7pln" path="res://asset/Mystery Font.ttf" id="2_v5eom"]
 [ext_resource type="Texture2D" uid="uid://cdcgwtohlisik" path="res://asset/obj/plr_hp_coin.png" id="3_qih31"]
+[ext_resource type="Shader" uid="uid://0nvl2kjeaqby" path="res://asset/shader/outline.gdshader" id="3_v5eom"]
+[ext_resource type="Texture2D" uid="uid://dp7ilmp6xl0ue" path="res://asset/obj/ptt_plrcard.png" id="6_pfebb"]
 
 [sub_resource type="GDScript" id="GDScript_j1ehk"]
 resource_name = "game"
@@ -37,9 +39,9 @@ func _ready() -> void:
 	plr_card_mark_path = get_node(\"plr_card_mark\").get_path()
 	plr_token_mark_path = get_node(\"plr_token_mark\").get_path()
 	
-	setup()
+	setup(1)
 
-func setup():
+func setup(bet := 1):
 	var card_setup = func():
 		for i in range(card_start_c):
 			var card_ins = card.instantiate()
@@ -75,7 +77,7 @@ func _process(delta: float) -> void:
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 	
 	if Input.is_action_just_pressed(\"ui_up\"):
-		turn = \"e\"
+		PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":20, \"added_radius\":10, \"speed\": 0.7, \"col\" : Color.RED})
 	
 	#if holded card have been hovering
 	if plr_hold_card != null and plr_hold_card.mouse_in:
@@ -111,6 +113,13 @@ func _process(delta: float) -> void:
 			$plr_card_mark.add_card(card_ins)
 			
 			#turn = \"e\" #change to enemy turn
+
+func check_point():
+	if turn == \"p\":
+		pass
+	elif turn == \"e\":
+		pass
+	$stack.stack_sum
 "
 
 [sub_resource type="GDScript" id="GDScript_qih31"]
@@ -356,7 +365,7 @@ func _process(delta: float) -> void:
 					
 					PartSpawner.spawn(\"spr_ex\",get_parent().plr_hold_card.global_position + Vector2(-16,24) , {\"spr\" : load(\"res://asset/obj/ptt_plrcard.png\"), \"centered\": true, \"spr_speed\" : 0.97, \"speed\": 0.7, \"modulate\": RED_COLOR})
 					
-					PartSpawner.spawn(\"circle_ex\", get_node(get_parent().stack_path).global_position, {\"radius\":35, \"added_radius\":15, \"col\" : RED_COLOR})
+					PartSpawner.spawn(\"circle_ex\", get_node(get_parent().stack_path).global_position, {\"radius\":45, \"added_radius\":15, \"col\" : RED_COLOR})
 					
 					PartSpawner.spawn(\"text_float\", get_node(get_parent().stack_path).global_position + Vector2(0,-4), {\"text\": \"-\" + var_to_str(get_parent().plr_hold_card.real_value), \"color\": RED_COLOR, \"outline_color\": Color.BLACK})
 					
@@ -386,8 +395,21 @@ func _process(delta: float) -> void:
 	position += (to_pos - position) * 0.1
 "
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e3hox"]
+resource_local_to_scene = true
+shader = ExtResource("3_v5eom")
+shader_parameter/textureDimensionX = 20.0
+shader_parameter/textureDimensionY = 22.0
+shader_parameter/enable = 1
+shader_parameter/outlineColor = Color(1, 1, 1, 1)
+
 [sub_resource type="GDScript" id="GDScript_v5eom"]
 script/source = "extends Node2D
+
+
+
+func _process(delta: float) -> void:
+	pass
 "
 
 [sub_resource type="LabelSettings" id="LabelSettings_qih31"]
@@ -395,6 +417,43 @@ font = ExtResource("2_v5eom")
 font_size = 8
 outline_size = 3
 outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="Animation" id="Animation_pfebb"]
+resource_name = "new_animation"
+length = 3.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:material:shader_parameter/progress")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.7, 2.7),
+"transitions": PackedFloat32Array(1, 0.353554, 1),
+"update": 0,
+"values": [0.00100005, 0.00100005, 1.0]
+}
+
+[sub_resource type="Animation" id="Animation_ee422"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:material:shader_parameter/progress")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [-2.2352e-08]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_rv75o"]
+_data = {
+&"RESET": SubResource("Animation_ee422"),
+&"new_animation": SubResource("Animation_pfebb")
+}
 
 [node name="game" type="Node2D"]
 script = SubResource("GDScript_j1ehk")
@@ -433,23 +492,13 @@ gizmo_extents = 16.0
 script = SubResource("GDScript_n5oag")
 
 [node name="PlrHpCoin" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_e3hox")
 position = Vector2(12, 174)
 texture = ExtResource("3_qih31")
 
 [node name="PlrHpCoin2" type="Sprite2D" parent="."]
-position = Vector2(24, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin3" type="Sprite2D" parent="."]
-position = Vector2(36, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin4" type="Sprite2D" parent="."]
-position = Vector2(48, 174)
-texture = ExtResource("3_qih31")
-
-[node name="PlrHpCoin5" type="Sprite2D" parent="."]
-position = Vector2(60, 174)
+material = SubResource("ShaderMaterial_e3hox")
+position = Vector2(30, 174)
 texture = ExtResource("3_qih31")
 
 [node name="mouse_note" type="Node2D" parent="."]
@@ -462,3 +511,13 @@ offset_right = 44.0
 text = "test"
 label_settings = SubResource("LabelSettings_qih31")
 horizontal_alignment = 1
+
+[node name="Icon" type="Sprite2D" parent="."]
+position = Vector2(21, 29)
+texture = ExtResource("6_pfebb")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Icon"]
+libraries = {
+&"": SubResource("AnimationLibrary_rv75o")
+}
+autoplay = "new_animation"
