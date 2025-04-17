@@ -5,6 +5,7 @@ var line_ex = preload("res://src/parts/line_explode.tscn")
 var spr_ex = preload("res://src/parts/spr_explode.tscn")
 var text_float = preload("res://src/parts/text_float.tscn")
 var line_ex_cone = preload("res://src/parts/line_explode_cone.tscn")
+var spr_burn = preload("res://src/parts/sprite_burn.tscn")
 
 func spawn(part_name, glob_pos := Vector2.ZERO, part_attribute := {}):
 	var part_ins = get(part_name).instantiate()

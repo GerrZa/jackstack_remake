@@ -1,0 +1,49 @@
+[gd_scene load_steps=9 format=3 uid="uid://b137elfnewe76"]
+
+[ext_resource type="Shader" uid="uid://depxuwr33sc2t" path="res://asset/shader/burning.gdshader" id="1_3nym6"]
+[ext_resource type="Texture2D" uid="uid://dgbnbi1u6dlpj" path="res://icon.svg" id="2_hyh30"]
+
+[sub_resource type="Gradient" id="Gradient_hyh30"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_631u6"]
+gradient = SubResource("Gradient_hyh30")
+fill_to = Vector2(0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_wxymu"]
+noise_type = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_v83yd"]
+noise = SubResource("FastNoiseLite_wxymu")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hyh30"]
+shader = ExtResource("1_3nym6")
+shader_parameter/noiseTexture = SubResource("NoiseTexture2D_v83yd")
+shader_parameter/gradientTexture = SubResource("GradientTexture2D_631u6")
+shader_parameter/progress = 0.00100005
+shader_parameter/blackColor = Color(0.15056, 0.1504, 0.16, 1)
+shader_parameter/phase1Color = Color(0.87, 0.23664, 0.0783, 1)
+shader_parameter/phase2Color = Color(1, 0.934167, 0.21, 1)
+
+[sub_resource type="GDScript" id="GDScript_71nvd"]
+script/source = "extends Sprite2D
+
+var speed = 0.01
+
+func _physics_process(delta: float) -> void:
+	#set_instance_shader_parameter(\"progress\", (1 - get_instance_shader_parameter(\"progress\")) * speed)
+	material.set_shader_parameter(\"progress\", material.get_shader_parameter(\"progress\") + (1.0-material.get_shader_parameter(\"progress\")) * speed) 
+	if material.get_shader_parameter(\"progress\") >= 0.7:
+		queue_free()
+
+func set_att(var_name, value):
+	match var_name:
+		\"speed\":
+			speed = value
+		\"spr\":
+			texture = value
+"
+
+[node name="SpriteBurn" type="Sprite2D"]
+material = SubResource("ShaderMaterial_hyh30")
+texture = ExtResource("2_hyh30")
+script = SubResource("GDScript_71nvd")

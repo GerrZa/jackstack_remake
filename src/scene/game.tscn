@@ -31,7 +31,7 @@ var line_parts = preload(\"res://src/parts/line_explode.tscn\")
 #const WHITE_COLOR = Color.DARK_SEA_GREEN
 const WHITE_COLOR = Color.GREEN
 
-var turn = \"g\" # p for player, e for enemy, g for game state(no one can do anything)
+var turn = \"g_\" # p for player, e for enemy, g for game state(no one can do anything)
 
 func _ready() -> void:
 	stack_path = get_node(\"stack\").get_path()
@@ -76,7 +76,7 @@ func _process(delta: float) -> void:
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 	
 	if Input.is_action_just_pressed(\"ui_up\"):
-		PartSpawner.spawn(\"circle_ex\", get_global_mouse_position(), {\"radius\":20, \"added_radius\":10, \"speed\": 0.7, \"col\" : Color.RED})
+		reroll_card()
 	
 	#if holded card have been hovering
 	if plr_hold_card != null and plr_hold_card.mouse_in:
@@ -119,6 +119,29 @@ func check_point():
 	elif turn == \"e\":
 		pass
 	$stack.stack_sum
+
+func reroll_card():
+	turn = \"g\"
+	
+	for i in $plr_card_mark.get_children():
+		PartSpawner.spawn(\"spr_burn\", i.global_position + Vector2(-16, 24), {\"spr\" : load(\"res://asset/obj/ptt_plrcard.png\")})
+		i.queue_free()
+	
+	print(\"delete complete\")
+	
+	for i in range(5):
+		var card_ins = card.instantiate()
+		
+		card_ins.value = randi_range(1,12) #get random card value
+		
+		if card_ins.value >= 10:
+			card_ins.value = randi_range(10,13)
+		
+		$plr_card_mark.add_card(card_ins)
+		
+		await get_tree().create_timer(0.2).timeout
+	
+	turn = \"p\"
 "
 
 [sub_resource type="GDScript" id="GDScript_qih31"]
